@@ -6,25 +6,20 @@
 	<link rel="icon" href="favicon.ico" type="image/x-icon"/>
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
         <script src="dist/RTCMultiConnection.min.js"></script>
-		<script src="dist/getHTMLMediaElement.js"></script>	
+        <script src="dist/getHTMLMediaElement.js"></script>
         <script src="dist/socket.io.js"></script>
     </head>
     <body>
-        <div id="audios-container"></div>
+        <div id="audios-container" style="display: none;"></div>
         <script>
         	let connection = new RTCMultiConnection();
-			connection.channel = 'channel-global';
-			connection.sessionid = 'RPTeste';
 			let mystream = null;
 			let pressingpushtotalk = false;
-			var roomid;
 
 			connection.socketURL = "https://project-skazi-voip.herokuapp.com/";
-			connection.iceServers = [];
 
 			connection.socketMessageEvent = 'voice';
-			connection.autoCloseEntireSession =  false;
-			connection.leaveOnPageUnload = true;
+			connection.leaveOnPageUnload = false;
 
 			connection.session = {
 				audio: true,
@@ -46,43 +41,11 @@
 				room: ""
 			}
 
-			connection.iceServers.push(
-				{url:'stun:stun01.sipphone.com'},
-				{url:'stun:stun.ekiga.net'},
-				{url:'stun:stun.fwdnet.net'},
-				{url:'stun:stun.ideasip.com'},
-				{url:'stun:stun.iptel.org'},
-				{url:'stun:stun.rixtelecom.se'},
-				{url:'stun:stun.schlund.de'},
-				{url:'stun:stun.l.google.com:19302'},
-				{url:'stun:stun1.l.google.com:19302'},
-				{url:'stun:stun2.l.google.com:19302'},
-				{url:'stun:stun3.l.google.com:19302'},
-				{url:'stun:stun4.l.google.com:19302'},
-				{url:'stun:stunserver.org'},
-				{url:'stun:stun.softjoys.com'},
-				{url:'stun:stun.voiparound.com'},
-				{url:'stun:stun.voipbuster.com'},
-				{url:'stun:stun.voipstunt.com'},
-				{url:'stun:stun.voxgratia.org'},
-				{url:'stun:stun.xten.com'}
-			);
+			connection.onmute = function ( event ) {
+			}
 
-			connection.iceServers. push ({
-				url: 'turn:numb.viagenie.ca',
-				credential: 'muazkh',
-				username: 'webrtc@live.com'
-			},
-			{
-				url: 'turn:192.158.29.39:3478?transport=udp',
-				credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-				username: '28224511:1379330808'
-			},
-			{
-				url: 'turn:192.158.29.39:3478?transport=tcp',
-				credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-				username: '28224511:1379330808'
-			});
+			connection.onunmute = function ( event ) {
+			}
 
 			function setVolume(playerid, pVolume){
 			    var playerAudio = document.getElementById(playerid);
@@ -94,18 +57,16 @@
 			    playerAudio.muted = action;
 			}
 
-			connection.onstreamended = function(event) {
-			    // Desconectou
-			    var playerAudio = document.getElementById("userid_" + event.extra.idOfUser);
-				playerAudio.remove();
+			connection.onleave = function(event) {
 			    if (event.userid === connection.sessionid) {
-				//alert(connection.sessionid);
-				connection.openOrJoin( connection.sessionid );
-				connection.changeUserId(connection.sessionid);
-			    };
-			    if(event.type === 'remote') {
-				connection.receiveFirstRemoteStream = true;
-			    };
+				mp.trigger("reloadBrowser");
+			    }
+			};
+
+			connection.onstreamended = function(event) {
+				// Desconectou
+				var playerAudio = document.getElementById("userid_" + event.extra.idOfUser);
+				playerAudio.remove();
 			};
 
 			var audiosContainer = document.getElementById('audios-container');
@@ -114,24 +75,24 @@
 				event.mediaElement.id = "userid_" + event.extra.idOfUser;
 				audiosContainer.append(event.mediaElement);
 				 event.mediaElement.muted = true;
-
+				
 				if ( event.type == "local" ) {
 					mystream = event.stream;
-					//event.stream.mute( "audio" );
+					event.stream.mute( "audio" );
 				}
 			};
 
 			function joinRoom( idOfUser, room ) {
 					if ( connection.extra.room == "" ){
 					connection.extra.room = room;
-					roomid = room;
 					connection.openOrJoin( room );
-					//mp.trigger("contVoip");
+					mp.trigger("contVoip");
 				}
 				if ( connection.extra.idOfUser == "" ){
 					connection.extra.idOfUser = idOfUser;
 				}
-			};
+				connection = true;
+			}
 
 			function pressDown() {
 				if ( !pressingpushtotalk ) {
@@ -150,45 +111,6 @@
 					}
 				}
 			};
-
-			// below method "keepCheckingForRoom" keeps checking for room until joins it
-			(function keepCheckingForRoom() {
-			    if(!connection.receiveFirstRemoteStream) {
-				setTimeout(keepCheckingForRoom, 3000);
-				return;
-			    }
-			    connection.checkPresence(connection.sessionid, function(isRoomExist, roomid) {
-				if(connection.isInitiator) {
-				    console.log('Você é dono do quarto!');
-					connection.openOrJoin( connection.sessionid );
-					connection.changeUserId(roomid);
-				    return;
-				}
-				if(connection.peers[connection.sessionid]) {
-				    setTimeout(keepCheckingForRoom, 3000);
-				    console.log('O dono do quarto está no quarto!');
-				    return;
-				}
-				if (isRoomExist === true) {
-				    connection.openOrJoin( connection.sessionid ); //connection.join(roomid);
-				    console.log('Reuniu o quarto!!!!');
-				    setTimeout(keepCheckingForRoom, 3000);
-				    return;
-				}
-				console.log('Proprietário saiu. Reverificando para o quarto...');
-				setTimeout(keepCheckingForRoom, 3000);
-			    });
-			})();
-		(function checkRoom() {
-		    connection.getPublicModerators(function(owners) {
-			owners.forEach(function(owner) {
-			    //var roomid = owner.userid; // + owner.extra
-			    connection.openOrJoin( owner.userid ); //connection.join(roomid);
-			});
-
-			setTimeout(checkRoom, 3000); // recheck after every 3 seconds
-		    });
-		})();
 		</script>
     </body>
 </html>
