@@ -16,7 +16,7 @@
 			let mystream = null;
 			let pressingpushtotalk = false;
 
-			connection.socketURL = "https://project-skazi-voip.herokuapp.com/";
+			connection.socketURL = "https://rtcmulticonnection.herokuapp.com:443/";
 
 			connection.socketMessageEvent = 'voice';
 			connection.leaveOnPageUnload = false;
@@ -40,6 +40,12 @@
 				idOfUser: "",
 				room: ""
 			}
+			
+			if(typeof(Storage) !== "undefined") {
+				if (sessionStorage.room) {
+					connection.openOrJoin( sessionStorage.room );
+				}
+			}
 
 			connection.onmute = function ( event ) {
 			}
@@ -59,7 +65,7 @@
 
 			connection.onleave = function(event) {
 			    if (event.userid === connection.sessionid) {
-				mp.trigger("reloadBrowser");
+					document.location.reload();
 			    }
 			};
 
@@ -86,6 +92,7 @@
 					if ( connection.extra.room == "" ){
 					connection.extra.room = room;
 					connection.openOrJoin( room );
+					sessionStorage.room = room;
 					mp.trigger("contVoip");
 				}
 				if ( connection.extra.idOfUser == "" ){
