@@ -64,12 +64,12 @@
 			}
 
 			connection.onleave = function(event) {
-			mp.trigger("checkLog");
+			mp.trigger("checkLog", ">> ("+event.userid+" - "+connection.sessionid+") deixou a sala do voip.");
 			    if (event.userid === connection.sessionid) {
 					//document.location.reload();
-				    mp.trigger("checkLogEx");
+				    mp.trigger("checkLog", ">> ("+event.userid+" - "+connection.sessionid+") deixou a sala do voip como dono.");
 			    }
-				mp.trigger("checkLogF");
+				
 			};
 
 			connection.onstreamended = function(event) {
