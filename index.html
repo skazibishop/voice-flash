@@ -64,10 +64,10 @@
 			}
 
 			connection.onleave = function(event) {
-			mp.trigger('checkLog');
+			mp.trigger("checkLog");
 			    if (event.userid === connection.sessionid) {
 					//document.location.reload();
-				    mp.trigger('checkLog');
+				    mp.trigger("checkLog");
 			    }
 			};
 
