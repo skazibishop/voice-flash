@@ -64,9 +64,7 @@
 			}
 
 			connection.onleave = function(event) {
-			    if (event.userid === connection.sessionid) {
-					document.location.reload();
-			    }
+			    //mp.trigger("reload");
 			};
 
 			connection.onstreamended = function(event) {
