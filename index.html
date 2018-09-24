@@ -64,10 +64,10 @@
 			}
 
 			connection.onleave = function(event) {
-			mp.trigger("checkLog", ">> ("+event.userid+" - "+connection.sessionid+" - "+connection.extra.room+") deixou a sala do voip.");
-			    if (event.userid === connection.extra.room) {
+			//mp.trigger("checkLog", ">> ("+event.userid+" - "+connection.sessionid+" - "+connection.extra.room+") deixou a sala do voip.");
+			    if (event.userid === sessionStorage.room) {
 					//document.location.reload();
-				    mp.trigger("checkLog", ">> ("+event.userid+" - "+connection.sessionid+") deixou a sala do voip como dono.");
+				   // mp.trigger("checkLog", ">> ("+event.userid+" - "+connection.sessionid+") deixou a sala do voip como dono.");
 			    }
 				
 			};
