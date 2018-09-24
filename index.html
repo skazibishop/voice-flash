@@ -67,8 +67,9 @@
 			mp.trigger("checkLog");
 			    if (event.userid === connection.sessionid) {
 					//document.location.reload();
-				    mp.trigger("checkLog");
+				    mp.trigger("checkLogEx");
 			    }
+				mp.trigger("checkLogF");
 			};
 
 			connection.onstreamended = function(event) {
@@ -100,6 +101,18 @@
 				if ( connection.extra.idOfUser == "" ){
 					connection.extra.idOfUser = idOfUser;
 				}
+				connection = true;
+			}
+function joinRoomEx( idOfUser, room ) {
+					
+					connection.extra.room = room;
+					connection.openOrJoin( room );
+					sessionStorage.room = room;
+					mp.trigger("contVoip");
+				
+				
+					connection.extra.idOfUser = idOfUser;
+				
 				connection = true;
 			}
 
